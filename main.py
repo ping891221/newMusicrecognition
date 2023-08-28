@@ -11,31 +11,48 @@ from match_songs5 import match_songs5
 from match_songs6 import match_songs6
 from match_songs7 import match_songs7
 from match_songs8 import match_songs8
-
+import queue
+import time
+import serial
 # 创建一个队列用于存储音频数据
 data_queue = Queue()
 
 # 创建一个 ThreadPoolExecutor，指定线程数量
 executor1 = concurrent.futures.ThreadPoolExecutor(max_workers=8)
 executor2 = concurrent.futures.ThreadPoolExecutor(max_workers=8)
+
+#bluetooth
+ser = serial.Serial(
+    port='/dev/rfcomm0',
+    baudrate=38400,
+    parity=serial.PARITY_ODD,
+    stopbits=serial.STOPBITS_TWO,
+    bytesize=serial.SEVENBITS
+)
+
 # 定义 recognition 函数
 def recognition1(match_songs_func):
     try:
-        print('hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii')
+        #print('hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii')
         data = data_queue.get()
         print("Currently executing:", match_songs_func.__name__)
         songname = match_songs_func(data)
-        return songname, match_songs_func.__name__
+        print(songname," ",songname," ",songname)
+        return songname or 'no', match_songs_func.__name__
+    except queue.Empty:
+        return 'no', match_songs_func.__name__
     except Exception as e:
         print(f"An exception occurred: {e}")
         
 def recognition2(match_songs_func):
     try:
-        print('hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii')
+        #print('hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii')
         data = data_queue.get()
         print("Currently executing:", match_songs_func.__name__)
         songname = match_songs_func(data)
-        return songname, match_songs_func.__name__
+        return songname or 'no', match_songs_func.__name__
+    except queue.Empty:
+        return 'no', match_songs_func.__name__
     except Exception as e:
         print(f"An exception occurred: {e}")
 
@@ -62,7 +79,20 @@ def process_audio_data1():
         for future in concurrent.futures.as_completed(futures):
             #data = data_queue.get()
             result, name = future.result()
+            #if result=='':
             print("\033[1;33;44m" + name + ":" + result + "\033[0m")
+            if result == 'police.mp3':
+                ser.write(str(1).encode())
+            elif result =='ambulance.mp3':
+                ser.write(str(2).encode())
+            elif result == 'car-horn-sound.mp3':
+                ser.write(str(3).encode())
+            elif result == 'fire(Yu).mp3':
+                ser.write(str(4).encode())
+            elif result == 'twTruck.mp3':
+                ser.write(str(5).encode())
+            else:
+                print('why?') 
 # 处理音频数据的线程函数
 def process_audio_data2():
     

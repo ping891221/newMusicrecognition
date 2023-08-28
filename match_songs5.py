@@ -147,24 +147,26 @@ def match_songs5(data):
 
   total_matches_found = len(matches)
 
-  #print ('')
-
-  if total_matches_found > 5:
+  if total_matches_found > 5 :
     msg = ' ** totally found %d hash matches'
     print (colored(msg, 'green') % total_matches_found)
-
+    
     song = align_matches(matches)
+    if song['CONFIDENCE'] > 5:
+      msg = ' => song: %s (id=%d)\n'
+      msg += '    offset: %d (%d secs)\n'
+      msg += '    confidence: %d'
 
-    msg = ' => song: %s (id=%d)\n'
-    msg += '    offset: %d (%d secs)\n'
-    msg += '    confidence: %d'
-
-    print (colored(msg, 'green') % (
-      song['SONG_NAME'], song['SONG_ID'],
-      song['OFFSET'], song['OFFSET_SECS'],
-      song['CONFIDENCE']
-    ))
-    return song['SONG_NAME']
+      print (colored(msg, 'green') % (
+        song['SONG_NAME'], song['SONG_ID'],
+        song['OFFSET'], song['OFFSET_SECS'],
+        song['CONFIDENCE']
+      ))
+      return song['SONG_NAME']
+    else:
+      msg = ' ** not matches found at all'
+      print (colored(msg, 'red'))
+      return 'no'
   else:
     msg = ' ** not matches found at all'
     print (colored(msg, 'red'))
